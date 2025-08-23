@@ -1,11 +1,13 @@
 package com.example.authservice.service;
 
+import com.example.authservice.EventProducer.UserInfoProducer;
 import com.example.authservice.model.UserDetailsDto;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.example.authservice.model.UserSignUpEventDto;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    UserInfoProducer userInfoProducer;
     @Autowired
     PasswordEncoder passwordEncoder;
     
@@ -55,6 +59,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         String userId = UUID.randomUUID().toString();
         userRepository.save(new UserInfo(userId, userDetailsDto.getFirstName(), userDetailsDto.getLastName(), userDetailsDto.getUsername(), userDetailsDto.getPassword(), userDetailsDto.getEmail(), new HashSet<>()));
+        UserSignUpEventDto event = UserSignUpEventDto.builder().userId(userId).firstName(userDetailsDto.getFirstName()).lastName(userDetailsDto.getLastName()).email(userDetailsDto.getEmail()).build();
+        userInfoProducer.sendEventToKafka(event);
         return true; 
     }
 
