@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,18 @@ public class RefreshTokenService {
     RefreshTokenRepository refreshTokenRepository;
     @Autowired
     UserRepository userRepository;
-
+    @Transactional
     public RefreshToken createRefreshToken(String username){
         UserInfo userInfo = userRepository.findByUsername(username);
-        RefreshToken refreshToken = RefreshToken.builder().userInfo(userInfo).token(UUID.randomUUID().toString()).expiryDate(Instant.now().plusMillis(600000)).build();
+        
+        // Delete any existing refresh tokens for this user
+        deleteByUser(userInfo);
+        
+        RefreshToken refreshToken = RefreshToken.builder()
+            .userInfo(userInfo)
+            .token(UUID.randomUUID().toString())
+            .expiryDate(Instant.now().plusMillis(600000))
+            .build();
         return refreshTokenRepository.save(refreshToken);
 
     }
@@ -39,6 +48,11 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
+    public void deleteByUser(UserInfo userInfo){
+        refreshTokenRepository.deleteByUserInfo(userInfo);
+    }
 
-
+    public Optional<RefreshToken> findByUser(UserInfo userInfo){
+        return refreshTokenRepository.findByUserInfo(userInfo);
+    }
 }

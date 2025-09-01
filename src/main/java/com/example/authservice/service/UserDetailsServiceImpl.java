@@ -2,12 +2,12 @@ package com.example.authservice.service;
 
 import com.example.authservice.EventProducer.UserInfoProducer;
 import com.example.authservice.model.UserDetailsDto;
+import com.example.authservice.model.UserSignUpEventDto;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.example.authservice.model.UserSignUpEventDto;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,6 +50,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public boolean signupUser(UserDetailsDto userDetailsDto){
+        // Check if email is null or empty
+        if (userDetailsDto.getEmail() == null || userDetailsDto.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        
         if (!userDetailsDto.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             throw new IllegalArgumentException("Invalid email format");
         }
@@ -59,7 +64,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         String userId = UUID.randomUUID().toString();
         userRepository.save(new UserInfo(userId, userDetailsDto.getFirstName(), userDetailsDto.getLastName(), userDetailsDto.getUsername(), userDetailsDto.getPassword(), userDetailsDto.getEmail(), new HashSet<>()));
-        UserSignUpEventDto event = UserSignUpEventDto.builder().userId(userId).firstName(userDetailsDto.getFirstName()).lastName(userDetailsDto.getLastName()).email(userDetailsDto.getEmail()).build();
+
+        UserSignUpEventDto event = UserSignUpEventDto.builder()
+                .userId(userId)
+                .firstName(userDetailsDto.getFirstName())
+                .lastName(userDetailsDto.getLastName())
+                .email(userDetailsDto.getEmail())
+                .build();
         userInfoProducer.sendEventToKafka(event);
         return true; 
     }
