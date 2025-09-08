@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class UserInfoProducer {
     KafkaTemplate<String, Object> template;
     
-    @Value("${spring.kafka.topic-name}")
+    @Value("${KAFKA_TOPIC}")
     private String TOPIC;
 
     @Autowired
@@ -22,10 +22,16 @@ public class UserInfoProducer {
     }
 
     public void sendEventToKafka(UserSignUpEventDto dto) {
-        Message<UserSignUpEventDto> message = MessageBuilder
-                .withPayload(dto)
-                .setHeader(KafkaHeaders.TOPIC, TOPIC)
-                .build();
-        template.send(message);
+        try {
+            Message<UserSignUpEventDto> message = MessageBuilder
+                    .withPayload(dto)
+                    .setHeader(KafkaHeaders.TOPIC, TOPIC)
+                    .build();
+            System.out.println("sending to the topic :" + TOPIC);
+            template.send(message);
+        }
+        catch (Exception e){
+            System.out.println("Exception in UserInfoProducer " + e.getMessage());
+        }
     }
 }
