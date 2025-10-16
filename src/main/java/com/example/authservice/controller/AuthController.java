@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +25,7 @@ public class AuthController {
     RefreshTokenService refreshTokenService;
     @Autowired
     jwtService jwtService;
-    @PostMapping("/auth/v1/signup")
+    @PostMapping("/auth/signup")
     public ResponseEntity<?> signUpUser(@RequestBody UserDetailsDto userDetailsDto) {
         try {
             Boolean isSignedUp = userDetailsService.signupUser(userDetailsDto);
@@ -36,7 +39,8 @@ public class AuthController {
         } catch (Exception e) {
             return new ResponseEntity<>("Exception in User Service " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
+
+
     }
 
 

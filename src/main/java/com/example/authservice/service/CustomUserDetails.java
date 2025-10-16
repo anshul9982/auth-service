@@ -20,6 +20,7 @@ public class CustomUserDetails extends UserInfo implements UserDetails {
     public CustomUserDetails(UserInfo user){
         this.username = user.getUsername();
         this.password = user.getPassword();
+        this.userId = user.getUserId();
 
         List<GrantedAuthority> auths = new ArrayList<>();
         for (UserRoles roles : user.getRoles()){
@@ -42,5 +43,10 @@ public class CustomUserDetails extends UserInfo implements UserDetails {
     @Override
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public String getUserId() {
+        return userId;
     }
 }

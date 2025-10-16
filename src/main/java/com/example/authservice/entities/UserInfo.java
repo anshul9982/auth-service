@@ -17,7 +17,7 @@ import java.util.HashSet;
 public class UserInfo {
     @Id
     @Column(name = "user_id")
-    private String userId;
+    protected String userId;
     private String firstName;
     private String lastName;
     private String username;
