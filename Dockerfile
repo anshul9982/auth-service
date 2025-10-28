@@ -1,11 +1,11 @@
-# Dockerfile
-FROM gradle:8.6-jdk17 AS build
+# Dockerfile for auth-service
+FROM gradle:8.10.0-jdk21 AS build
 WORKDIR /app
 COPY . .
-RUN gradle build -x test
+RUN gradle clean build -x test
 
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 9898
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
